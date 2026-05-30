@@ -1,8 +1,7 @@
 from datetime import UTC, datetime, timedelta
-import hashlib
-import hmac
 from typing import Any
 
+import bcrypt
 import jwt
 from jwt import InvalidTokenError
 from sqlalchemy import select
@@ -17,13 +16,14 @@ class AuthenticationError(Exception):
 
 
 def hash_password(password: str, salt: str) -> str:
-    seed = f"{salt}:{password}".encode("utf-8")
-    return hashlib.sha256(seed).hexdigest()
+    # Keep salt in the input contract for compatibility with existing callers.
+    seeded_password = f"{salt}:{password}".encode("utf-8")
+    return bcrypt.hashpw(seeded_password, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(*, password: str, password_hash: str, salt: str) -> bool:
-    computed = hash_password(password=password, salt=salt)
-    return hmac.compare_digest(computed, password_hash)
+    seeded_password = f"{salt}:{password}".encode("utf-8")
+    return bcrypt.checkpw(seeded_password, password_hash.encode("utf-8"))
 
 
 def issue_access_token(*, subject: str, scope: str, settings: Settings) -> str:
