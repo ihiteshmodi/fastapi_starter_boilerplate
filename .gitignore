@@ -13,6 +13,5 @@ wheels/
 .env
 .claude
 zHelper_Stuff
-.vscode
 # Added by code-review-graph
 .code-review-graph/
