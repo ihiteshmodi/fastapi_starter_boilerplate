@@ -16,6 +16,7 @@ from app.security.content_filter import RateLimitQuotaMiddleware
 from app.security.input_guard import require_basic_or_premium
 from app.security.output_filter import install_error_handlers
 from app.services.auth_service import AuthenticationError, authenticate
+from app.services.migrations import run_migrations
 from app.services.memory_service import create_session_factory, seed_demo_users
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
 
+    run_migrations(settings.database_url)
     app.state.db_session_factory = create_session_factory(settings.database_url)
     seed_demo_users(
         app.state.db_session_factory,

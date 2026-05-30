@@ -3,7 +3,7 @@ from collections.abc import Generator
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.models import AuthUser, Base
+from app.models import AuthUser
 from app.services.auth_service import hash_password
 
 
@@ -14,7 +14,6 @@ def _is_sqlite(url: str) -> bool:
 def create_session_factory(database_url: str) -> sessionmaker[Session]:
     connect_args = {"check_same_thread": False} if _is_sqlite(database_url) else {}
     engine = create_engine(database_url, future=True, connect_args=connect_args)
-    Base.metadata.create_all(bind=engine)
     return sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
